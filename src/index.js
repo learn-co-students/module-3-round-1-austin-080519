@@ -177,7 +177,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Create comment event listener
   submitButton.addEventListener("click", event => {
     event.preventDefault();
-    createComment();
+
+    if (commentInput.value === "") {
+      return;
+    } else {
+      createComment();
+    }
   })
 
 })
