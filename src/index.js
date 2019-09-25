@@ -86,7 +86,7 @@ function deleteComment(comment) {
   let objConfig = {
     method: "DELETE",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(data)
   }
@@ -94,6 +94,7 @@ function deleteComment(comment) {
   fetch(`${commentsURL}/${comment['id']}`, objConfig)
   .then(response => response.json())
   .then(commentObj => {
+    console.log(commentObj);
     let commentItem = document.querySelector(`[comment-id="${comment['id']}"]`);
     commentItem.parentNode.removeChild(commentItem);
   })
@@ -164,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 
 
-  // New comment event listener
+  // Create comment event listener
   submitButton.addEventListener("click", event => {
     event.preventDefault();
     createComment();
