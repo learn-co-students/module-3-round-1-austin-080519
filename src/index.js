@@ -33,16 +33,16 @@ function fetchImage() {
 
 function likeImage() {
   let data = {
-    image_id: imageId
+    image_id: 3474
   }
 
   let objConfig = {
     method: "POST",
     headers: {
-      "Content=Type": "application/json",
+      "Content-Type": "application/json",
       "Accept": "application/json"
     },
-    body: data
+    body: JSON.stringify(data)
   }
 
   fetch(likeURL, objConfig)
@@ -107,12 +107,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   fetchImage();
 
+  // Like button event listener
   likeButton.addEventListener("click", event => {
     event.preventDefault();
     incrementLikes();
     likeImage();
   })
 
+
+  // New comment event listener
   submitButton.addEventListener("click", event => {
     event.preventDefault();
     newComment();
