@@ -71,6 +71,31 @@ function createComment() {
   .then(response => response.json())
   .then(commentObj => {
     console.log(commentObj);
+    newComment(commentObj);
+    commentInput.value = "";
+  })
+}
+
+function deleteComment(comment) {
+  let data = {
+    id: comment['id'],
+    content: comment['content'],
+    image_id: comment['image_id']
+  }
+
+  let objConfig = {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  }
+
+  fetch(`${commentsURL}/${comment['id']}`, objConfig)
+  .then(response => response.json())
+  .then(commentObj => {
+    let commentItem = document.querySelector(`[comment-id="${comment['id']}"]`);
+    commentItem.parentNode.removeChild(commentItem);
   })
 }
 
@@ -81,15 +106,39 @@ function displayComments(image) {
     const commentItem = document.createElement("li");
     commentItem.setAttribute("comment-id", `${comment['id']}`);
     commentItem.innerText = comment['content'];
+
+    const deleteButton = document.createElement("button");
+    deleteButton.setAttribute("comment-button-id", `${comment['id']}`);
+    deleteButton.innerText = "Delete";
+    createDeleteEvent(deleteButton, comment);
+
+    commentItem.appendChild(deleteButton);
     commentsList.appendChild(commentItem);
   }
 }
 
-function newComment() {
+function newComment(comment) {
   const commentItem = document.createElement("li");
+  commentItem.setAttribute("comment-id", `${comment['id']}`);
   commentItem.innerText = commentInput.value;
   commentsList.appendChild(commentItem);
+
+  const deleteButton = document.createElement("button");
+  deleteButton.setAttribute("comment-button-id", `${comment['id']}`);
+  deleteButton.innerText = "Delete";
+  createDeleteEvent(deleteButton, comment);
+
+  commentItem.appendChild(deleteButton);
+  commentsList.appendChild(commentItem);
 }
+
+function createDeleteEvent(button, comment) {
+  button.addEventListener("click", event => {
+    event.preventDefault();
+    deleteComment(comment);
+  })
+}
+
 
 function incrementLikes() {
   let currentLikes = totalLikes.innerText;
@@ -118,9 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // New comment event listener
   submitButton.addEventListener("click", event => {
     event.preventDefault();
-    newComment();
     createComment();
-    commentInput.value = "";
   })
 
 })
