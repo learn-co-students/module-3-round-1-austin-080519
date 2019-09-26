@@ -6,91 +6,99 @@ document.addEventListener('DOMContentLoaded', () => {
   const likeURL = `https://randopic.herokuapp.com/likes/`
   const commentsURL = `https://randopic.herokuapp.com/comments/`
 
-  const imageCard = document.getElementById('image-card')
   const likeButton = document.getElementById('like_button')
   const likes = document.getElementById('likes')
   const namePlace = document.getElementById('name')
   const image = document.getElementById('image')
-  const commentInput = document.getElementById('comment_input')
+  const userComment = document.getElementById('comment_input')
   const commentSection = document.getElementById('comments')
+  const commentForm = document.getElementById('comment_form')
 
-fetch(imageURL) 
-  .then(response => response.json())
-  .then(data => {
-    console.log(data)
+  fetch(imageURL) 
+    .then(response => response.json())
+    .then(data => {
+      console.log(data)
+    
+      showLikes(data)
+      showImage(data)
+      showComments(data)
+  }); 
   
-    showImage(data)
-    addLikes(data)
-    showComments(data)
-    createComment(data)
-  }) 
+  addLikes();
+  createComment();
+
+  function showLikes(data) {
+    likes.innerText = data.like_count
+  };
 
   function showImage(data) {
     namePlace.innerText = `${data.name}`;
-    image.src = imageURL;
-  }
+    image.src = data.url;
+  };
 
   function showComments(data) {
-    const li = document.createElement('li')
-    const pictureComments = `${data.comments[0].content}`
-      //   // -----------------------
-      //   pictureComments.forEach(function (comment) {
-      //     console.log(comment.content);
-      // });
+      const pictureComments = data.comments
+      pictureComments.forEach(function (comment) {
+      const innerContent = comment.content;
+      const commentId = comment.id;
+      const li = document.createElement('li')
+      const deleteBtn = document.createElement('button')
+      deleteBtn.innerHTML = 'delete'
+      li.innerText = innerContent
+      li.appendChild(deleteBtn)
+      commentSection.appendChild(li)
     
-      // //----------------------------------
-    li.innerText = pictureComments
-    commentSection.appendChild(li)
-    
+    deleteBtn.addEventListener("click", (event) =>{
+      fetch(`https://randopic.herokuapp.com/comments/${commentId}`, {
+        method: 'DELETE'
+        });
+      });
+    })
   };
 
   function createComment(data) {
-    const newComment = commentInput.value
-    const commentForm = document.getElementById('comment_form')
-
-    console.log(newComment)
-
-    commentForm.addEventListener("click", (event) =>{
+    commentForm.addEventListener("submit", (event) =>{
       event.preventDefault()
       const newli = document.createElement('li')
-      newli.innerText = newComment
+      userCommentValue = userComment.value
+      newli.innerText = userCommentValue
       commentSection.appendChild(newli)
-    })
-
+      userComment.value = ""
+    
+      fetch(commentsURL, {
+        method: 'POST',
+        body: JSON.stringify({
+          image_id: imageId,
+          content: userCommentValue
+        }),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+          }
+        });
+    });
   };
 
-  function addLikes(data) {
-    var myLikes = `${data.like_count}`
-    likes.innerText = myLikes
+  function addLikes() {
 
     likeButton.addEventListener("click", (event) => {
-      event.preventDefault()
-      var updatedLikes = myLikes++; 
-      return likes.innerText = updatedLikes
+      let updatedLikes = parseInt(likes.innerText, 10) + 1; 
+      likes.innerText = updatedLikes
+      
+      fetch(likeURL, {
+        method: 'POST',
+        body: JSON.stringify({
+          image_id: imageId,
+          like_count: updatedLikes
+        }),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+          }
+      });
     });
-
-    fetch(likeURL, {
-      //prevent default
-      method: 'POST',
-      body: JSON.stringify({
-        image_id: imageId,
-        like_count: myLikes
-      }),
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-
-    });
-
-  }
-// function showImage() {
-    
-//   imageCard.appendChild
-// }
+  };
 
 });
 
 //current bugs
-// line 22: adding likes per refresh - need to use callback to ensure can use data outside of scope
-// line 53: need to get to the submit button, not just the form for the click event.
